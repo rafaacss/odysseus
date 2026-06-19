@@ -30,6 +30,7 @@ spec:
       containers:
         - name: odysseus
           image: ghcr.io/rafaacss/odysseus:dev
+          imagePullPolicy: Always
           ports:
             - containerPort: 7000
           envFrom:
