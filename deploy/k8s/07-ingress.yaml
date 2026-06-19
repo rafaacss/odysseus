@@ -4,10 +4,9 @@ metadata:
   name: odysseus
   namespace: odysseus
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod-cloudflare-dns01
 spec:
-  ingressClassName: nginx
+  ingressClassName: traefik
   tls:
     - hosts:
         - odysseus.rafstack.com.br
