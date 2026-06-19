@@ -4,7 +4,8 @@ metadata:
   name: odysseus-config
   namespace: odysseus
 data:
-  LLM_HOST: "localhost"
+  LLM_HOST: "10.0.0.239"
+  OLLAMA_BASE_URL: "http://10.0.0.239:11434"
   SEARXNG_INSTANCE: "http://searxng:8080"
   CHROMADB_HOST: "chromadb"
   CHROMADB_PORT: "8000"
