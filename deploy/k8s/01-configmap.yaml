@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odysseus-config
+  namespace: odysseus
+data:
+  LLM_HOST: "localhost"
+  SEARXNG_INSTANCE: "http://searxng:8080"
+  CHROMADB_HOST: "chromadb"
+  CHROMADB_PORT: "8000"
+  DATABASE_URL: "sqlite:///./data/app.db"
+  AUTH_ENABLED: "true"
+  LOCALHOST_BYPASS: "false"
+  ODYSSEUS_ADMIN_USER: "admin"
+  ALLOWED_ORIGINS: "https://odysseus.redbeauty.com.br"
+  SECURE_COOKIES: "true"
+  FASTEMBED_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
+  CLEANUP_INTERVAL_HOURS: "24"
+  ODYSSEUS_INPROCESS_POLLERS: "1"
+  ODYSSEUS_INPROCESS_TASKS: "1"
+  PUID: "1000"
+  PGID: "1000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: searxng-settings-template
+  namespace: odysseus
+data:
+  settings.yml.template: |
+    use_default_settings: true
+
+    server:
+      secret_key: "__SEARXNG_SECRET__"
+
+    search:
+      formats:
+        - html
+        - json

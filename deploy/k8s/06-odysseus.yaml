@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odysseus
+  namespace: odysseus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: odysseus
+  template:
+    metadata:
+      labels:
+        app: odysseus
+    spec:
+      initContainers:
+        - name: init-dirs
+          image: busybox:1.36
+          command: ["sh", "-c", "mkdir -p /app/data/ssh /app/data/huggingface /app/data/local /app/logs && chown -R 1000:1000 /app/data /app/logs"]
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+              subPath: data
+            - name: data
+              mountPath: /app/logs
+              subPath: logs
+      containers:
+        - name: odysseus
+          image: ghcr.io/rafaacss/odysseus:dev
+          ports:
+            - containerPort: 7000
+          envFrom:
+            - configMapRef:
+                name: odysseus-config
+          env:
+            - name: ODYSSEUS_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odysseus-secrets
+                  key: ODYSSEUS_ADMIN_PASSWORD
+                  optional: true
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+              subPath: data
+            - name: data
+              mountPath: /app/logs
+              subPath: logs
+            - name: data
+              mountPath: /app/.ssh
+              subPath: data/ssh
+            - name: data
+              mountPath: /app/.cache/huggingface
+              subPath: data/huggingface
+            - name: data
+              mountPath: /app/.local
+              subPath: data/local
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 7000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: 7000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: odysseus-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: odysseus
+  namespace: odysseus
+spec:
+  selector:
+    app: odysseus
+  ports:
+    - port: 7000
+      targetPort: 7000

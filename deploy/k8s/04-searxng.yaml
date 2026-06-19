@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: odysseus
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      containers:
+        - name: searxng
+          image: docker.io/searxng/searxng:2026.5.31-7159b8aed
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              if [ ! -s /etc/searxng/settings.yml ] || grep -q 'odysseus-local-searxng-json-2026-05-30\|__SEARXNG_SECRET__' /etc/searxng/settings.yml; then
+                secret="${SEARXNG_SECRET:-}"
+                if [ -z "$secret" ]; then
+                  secret="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+                fi
+                sed "s|__SEARXNG_SECRET__|$secret|g" /tmp/searxng-settings.yml.template > /etc/searxng/settings.yml
+              fi
+              exec /usr/local/searxng/entrypoint.sh
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SEARXNG_BASE_URL
+              value: "http://searxng:8080/"
+            - name: SEARXNG_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: odysseus-secrets
+                  key: SEARXNG_SECRET
+          securityContext:
+            capabilities:
+              drop: ["ALL"]
+              add: ["CHOWN", "SETGID", "SETUID", "DAC_OVERRIDE"]
+          readinessProbe:
+            exec:
+              command: ["python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/', timeout=5).read(1)"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 20
+          volumeMounts:
+            - name: data
+              mountPath: /etc/searxng
+            - name: settings-template
+              mountPath: /tmp/searxng-settings.yml.template
+              subPath: settings.yml.template
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: searxng-data
+        - name: settings-template
+          configMap:
+            name: searxng-settings-template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searxng
+  namespace: odysseus
+spec:
+  selector:
+    app: searxng
+  ports:
+    - port: 8080
+      targetPort: 8080
