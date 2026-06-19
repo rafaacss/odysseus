@@ -15,6 +15,7 @@ spec:
       labels:
         app: chromadb
     spec:
+      enableServiceLinks: false
       containers:
         - name: chromadb
           image: docker.io/chromadb/chroma:latest

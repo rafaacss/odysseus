@@ -12,7 +12,7 @@ data:
   AUTH_ENABLED: "true"
   LOCALHOST_BYPASS: "false"
   ODYSSEUS_ADMIN_USER: "admin"
-  ALLOWED_ORIGINS: "https://odysseus.redbeauty.com.br"
+  ALLOWED_ORIGINS: "https://odysseus.rafstack.com.br"
   SECURE_COOKIES: "true"
   FASTEMBED_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
   CLEANUP_INTERVAL_HOURS: "24"

@@ -15,6 +15,7 @@ spec:
       labels:
         app: ntfy
     spec:
+      enableServiceLinks: false
       containers:
         - name: ntfy
           image: docker.io/binwiederhier/ntfy

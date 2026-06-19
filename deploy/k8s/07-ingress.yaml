@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - odysseus.redbeauty.com.br
+        - odysseus.rafstack.com.br
       secretName: odysseus-tls
   rules:
-    - host: odysseus.redbeauty.com.br
+    - host: odysseus.rafstack.com.br
       http:
         paths:
           - path: /
